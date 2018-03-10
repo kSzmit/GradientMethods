@@ -79,11 +79,32 @@ def svrg(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None):
 
     return estimated_beta
 
+def batch_gradient_descent(beta, matrix_x, vector_y, gamma):
+    n = len(matrix_x)
+    estimated_beta = beta
+
+    for k in range(1000):
+        gradient_avg = average_of_derivatives(matrix_x, vector_y, estimated_beta)
+        estimated_beta = estimated_beta - gamma*gradient_avg
+    return estimated_beta
+
+def stochastic_gradient_descent(beta, matrix_x, vector_y, gamma):
+    n = len(matrix_x)
+    estimated_beta = beta
+    index_list = list(range(len(matrix_x)))
+    for k in range(10):
+        np.random.shuffle(index_list)
+        for index in index_list:
+            single_gradient = compute_derivative_f_i(matrix_x[index], vector_y[index], estimated_beta)
+            estimated_beta = estimated_beta - gamma*single_gradient
+    return estimated_beta
+
 
 n1_mean = [0, 0]
 n1_cov = [[1, 0], [0, 1]]
 ile = 1000
 x = np.random.multivariate_normal(n1_mean, n1_cov, ile)
+
 beta = [1, 5]
 p = [compute_p_i(x[i],beta) for i in range(len(x))]
 y = np.random.binomial(np.ones((len(x),), dtype=int), p)
@@ -91,6 +112,8 @@ y = np.random.binomial(np.ones((len(x),), dtype=int), p)
 print("maine saga:",saga([1, 1], x, y, 1/10))
 print("maine sag:",sag([1, 1], x, y, 1/10))
 print("maine svrg:",svrg([1, 1], x, y, 1/10))
+print("maine sgd:", stochastic_gradient_descent([1, 1], x, y, 1/10))
+print("maine bgd:", batch_gradient_descent([1, 1], x, y, 1/10))
 lr = linear_model.LogisticRegression(solver='sag')
 fit = lr.fit(x,y)
 print("not maine fit:", lr.coef_)
