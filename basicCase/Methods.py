@@ -2,8 +2,6 @@ import numpy as np
 import math
 import random
 from basicCase.Utils import AveragableTable
-from sklearn import linear_model
-
 
 def compute_p_i(x_i, beta):
     exponent = np.dot(x_i, beta)
