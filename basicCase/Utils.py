@@ -1,4 +1,5 @@
 import numpy as np
+import timeit
 
 class AveragableTable:
     def __init__(self, matrix=None):
@@ -50,3 +51,6 @@ def generate_cov_matrix(dim, rho = 0, correlation_type = "constant"):
     else:
         raise ValueError("Error! Unknown correaltion type: " + correlation_type)
 
+def timer(s1, s2):
+    t = timeit.Timer(s1, s2)
+    return round(t.timeit(10), 2)
