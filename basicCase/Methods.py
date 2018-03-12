@@ -30,11 +30,12 @@ def lasso_proxy_operator(beta, gamma, lam):
     return [ np.sign(x)*max((math.fabs(x) - gamma*lam), 0) for x in beta]
 
 
-def sag(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None, divisor_param=None):
+def sag(matrix_x, vector_y, gamma, proximal_op=None, lam=None, divisor_param=None):
     if divisor_param is None:
         divisor_param = len(matrix_x)
 
     n = len(matrix_x)
+    beta = np.repeat(0, matrix_x.shape[1])
     average_table = AveragableTable([compute_derivative_f_i(matrix_x[i], vector_y[i], beta) for i in range(n)])
 
     estimated_beta = beta
@@ -52,12 +53,13 @@ def sag(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None, divisor_par
     return estimated_beta
 
 
-def saga(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None):
-    return sag(beta, matrix_x, vector_y, gamma, proximal_op, lam, 1)
+def saga(matrix_x, vector_y, gamma, proximal_op=None, lam=None):
+    return sag(matrix_x, vector_y, gamma, proximal_op, lam, 1)
 
 
-def svrg(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None):
+def svrg(matrix_x, vector_y, gamma, proximal_op=None, lam=None):
     n = len(matrix_x)
+    beta = np.repeat(0, matrix_x.shape[1])
     estimated_beta, tmp_beta = beta, beta
 
     for s in range(100):
@@ -79,18 +81,18 @@ def svrg(beta, matrix_x, vector_y, gamma, proximal_op=None, lam=None):
 
     return estimated_beta
 
-def batch_gradient_descent(beta, matrix_x, vector_y, gamma):
+def batch_gradient_descent(matrix_x, vector_y, gamma):
     n = len(matrix_x)
-    estimated_beta = beta
+    estimated_beta = np.repeat(0, matrix_x.shape[1])
 
     for k in range(1000):
         gradient_avg = average_of_derivatives(matrix_x, vector_y, estimated_beta)
         estimated_beta = estimated_beta - gamma*gradient_avg
     return estimated_beta
 
-def stochastic_gradient_descent(beta, matrix_x, vector_y, gamma):
+def stochastic_gradient_descent(matrix_x, vector_y, gamma):
     n = len(matrix_x)
-    estimated_beta = beta
+    estimated_beta = np.repeat(0, matrix_x.shape[1])
     index_list = list(range(len(matrix_x)))
     for k in range(10):
         np.random.shuffle(index_list)
@@ -98,22 +100,3 @@ def stochastic_gradient_descent(beta, matrix_x, vector_y, gamma):
             single_gradient = compute_derivative_f_i(matrix_x[index], vector_y[index], estimated_beta)
             estimated_beta = estimated_beta - gamma*single_gradient
     return estimated_beta
-
-
-n1_mean = [0, 0]
-n1_cov = [[1, 0], [0, 1]]
-ile = 1000
-x = np.random.multivariate_normal(n1_mean, n1_cov, ile)
-
-beta = [1, 5]
-p = [compute_p_i(x[i],beta) for i in range(len(x))]
-y = np.random.binomial(np.ones((len(x),), dtype=int), p)
-
-print("maine saga:",saga([1, 1], x, y, 1/10))
-print("maine sag:",sag([1, 1], x, y, 1/10))
-print("maine svrg:",svrg([1, 1], x, y, 1/10))
-print("maine sgd:", stochastic_gradient_descent([1, 1], x, y, 1/10))
-print("maine bgd:", batch_gradient_descent([1, 1], x, y, 1/10))
-lr = linear_model.LogisticRegression(solver='sag')
-fit = lr.fit(x,y)
-print("not maine fit:", lr.coef_)
