@@ -43,6 +43,18 @@ class AveragableTable:
     def __str__(self):
         return "Storage table: " + str(self.__storage_table) + '\n' + "Average: " + str(self.average)
 
+
+class SnapshotListHolder:
+    def __init__(self, snapshot):
+        self.__snapshot = list(snapshot)
+
+    def take_snapshot(self, snapshot):
+        self.__snapshot = list(snapshot)
+
+    def get_snapshot(self):
+        return self.__snapshot
+
+
 def generate_cov_matrix(dim, rho = 0, correlation_type = "constant"):
     if correlation_type == "constant":
         return np.full((dim,dim),rho) + (1-rho)*np.eye(dim)
@@ -51,6 +63,14 @@ def generate_cov_matrix(dim, rho = 0, correlation_type = "constant"):
     else:
         raise ValueError("Error! Unknown correaltion type: " + correlation_type)
 
+
 def timer(s1, s2):
     t = timeit.Timer(s1, s2)
     return round(t.timeit(10), 2)
+
+
+def row_norms(X, squared=False):
+    norms = np.einsum('ij,ij->i', X, X)
+    if not squared:
+        np.sqrt(norms, norms)
+    return norms
