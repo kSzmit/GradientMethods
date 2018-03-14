@@ -3,7 +3,6 @@ import math
 import random
 
 from sklearn import metrics
-
 from basicCase.Utils import AveragableTable, SnapshotListHolder
 from basicCase.Utils import row_norms
 
@@ -62,7 +61,7 @@ def evaluate_stop_condition(current_beta, beta_snapshot, current_iter, max_iter,
         return False
 
 
-def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_param=None, fit_intercept=False, max_iter=100):
+def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_param=None, fit_intercept=False, max_iter=100, treshold=0.0001):
     if divisor_param is None:
         divisor_param = len(matrix_x)
 
@@ -79,7 +78,7 @@ def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_para
     beta_snapshot = SnapshotListHolder(estimated_beta)
     current_iter = 0
 
-    while evaluate_stop_condition(estimated_beta, beta_snapshot, current_iter, max_iter):
+    while evaluate_stop_condition(estimated_beta, beta_snapshot, current_iter, max_iter, treshold=treshold):
         for i in range(n):
             j = random.randrange(n)
 
@@ -181,3 +180,4 @@ def stochastic_gradient_descent(matrix_x, vector_y, gamma=None, proximal_op=None
             estimated_beta = estimated_beta - gamma*single_gradient
         current_iter += 1
     return estimated_beta
+

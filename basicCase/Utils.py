@@ -74,3 +74,4 @@ def row_norms(X, squared=False):
     if not squared:
         np.sqrt(norms, norms)
     return norms
+
