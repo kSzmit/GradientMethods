@@ -81,17 +81,14 @@ x = np.random.multivariate_normal(mean_vec, cov_matrix_const, n)
 beta = np.random.binomial(np.ones((d,), dtype=int), 0.25)
 beta_vals= np.concatenate([np.array(np.random.uniform(-2, -1, math.floor(d/2))),np.array(np.random.uniform(1, 2, math.ceil(d/2)))])
 beta=np.multiply(beta_vals,beta)
-
 p = [compute_p_i(x[i], beta) for i in range(len(x))]
 y = np.random.binomial(np.ones((len(x),), dtype=int), p)
 
-lassocv = linear_model.LassoCV()
+
+lassocv = linear_model.LassoCV( fit_intercept=False, alphas=np.arange(0.001,0.05, 0.001))
 lassocv.fit(x, y)
 lam = lassocv.alpha_
 
-# OBJAWIONA BETA DLA KTÓREJ PROXY DZIALA
-# beta=[-1.64895984 ,0,   0,   0,   -1.44282142 ,0, 0 ,   0, -1.97939704, 0,  0 ,  1.75836838, 1.42183974 , 0,  0,   0,  1.81669823,  0, 0 , 0 ]
-# lam=0.007470726486351631
 
 print(beta)
 print("\n EXERCISE 2 NO PROXY VS PROXY CV LAMBDA")
@@ -110,7 +107,7 @@ print("SGD no proxy :", metrics.mean_squared_error(beta, stochastic_gradient_des
 print("--------------------------------------------------------")
 
 
-for lam in np.arange(0, 0.05, 0.01):
+for lam in np.arange(0, 0.005, 0.001):
 
     print("\n EXERCISE 2 NO PROXY VS PROXY FOR LAMBDAS")
     print("lambda CV: ", lassocv.alpha_)
