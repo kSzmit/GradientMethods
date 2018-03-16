@@ -75,9 +75,7 @@ x = np.random.multivariate_normal(mean_vec, cov_matrix_const, n)
 #                      "from sklearn import linear_model"), "sec.")
 
 
-
 #Zadanie 2
-
 
 beta = np.random.binomial(np.ones((d,), dtype=int), 0.25)
 beta_vals= np.concatenate([np.array(np.random.uniform(-2, -1, math.floor(d/2))),np.array(np.random.uniform(1, 2, math.ceil(d/2)))])
