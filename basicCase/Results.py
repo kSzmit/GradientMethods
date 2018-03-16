@@ -4,6 +4,7 @@ from sklearn import linear_model
 from basicCase.Methods import compute_p_i, saga, sag, svrg, stochastic_gradient_descent, batch_gradient_descent
 from basicCase.Utils import generate_cov_matrix, timer
 import math
+import random
 
 #Zadanie 1
 
@@ -81,15 +82,21 @@ x = np.random.multivariate_normal(mean_vec, cov_matrix_const, n)
 beta = np.random.binomial(np.ones((d,), dtype=int), 0.25)
 beta_vals= np.concatenate([np.array(np.random.uniform(-2, -1, math.floor(d/2))),np.array(np.random.uniform(1, 2, math.ceil(d/2)))])
 beta=np.multiply(beta_vals,beta)
+beta=[-1.03495018,	-0.,	-0.,	-0.,	-0.,	-0.
+,	-1.63825899,	-1.75587161,	-0.,	-0.,	0.,	1.17102776
+,	0.,	0.,	0.,	0.,	1.44381657,	0.
+,	0.,	0.	]
+
 p = [compute_p_i(x[i], beta) for i in range(len(x))]
+
 y = np.random.binomial(np.ones((len(x),), dtype=int), p)
 
 
 lassocv = linear_model.LassoCV( fit_intercept=False, alphas=np.arange(0.001,0.05, 0.001))
 lassocv.fit(x, y)
-lam = lassocv.alpha_
+lam = lassocv.alpha_/10
 
-
+random.seed(10)
 print(beta)
 print("\n EXERCISE 2 NO PROXY VS PROXY CV LAMBDA")
 print("CV LAMBDA", lam)
@@ -107,10 +114,10 @@ print("SGD no proxy :", metrics.mean_squared_error(beta, stochastic_gradient_des
 print("--------------------------------------------------------")
 
 
-for lam in np.arange(0, 0.005, 0.001):
+for lam in np.arange(lassocv.alpha_/10-0.0002, lassocv.alpha_/10+0.0002, 0.0001):
 
     print("\n EXERCISE 2 NO PROXY VS PROXY FOR LAMBDAS")
-    print("lambda CV: ", lassocv.alpha_)
+    print("lambda CV: ", lassocv.alpha_/10)
     print("testing lambda", lam )
     print("--------------------------------------------------------")
     print("PROJECT RESULTS - MSE")
@@ -123,54 +130,35 @@ for lam in np.arange(0, 0.005, 0.001):
           ,metrics.mean_squared_error(beta, svrg(x, y,proximal_op=1, lam=lam, gamma=gamma)) )
     print("SGD no proxy :", metrics.mean_squared_error(beta, stochastic_gradient_descent(x, y, gamma=gamma))
           , "vs SGD proxy: ",metrics.mean_squared_error(beta, stochastic_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)) )
+    # print("BGD:", metrics.mean_squared_error(beta, batch_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)))
     print("--------------------------------------------------------")
 
 
-# print("--------------------------------------------------------")
-# print("Z PROXY")
-# print("lambda", lam)
-# print("--------------------------------------------------------")
-# print("PROJECT RESULTS - MSE")
-# print("--------------------------------------------------------")
-# print("SAGA:", )
-# print("SAG:", metrics.mean_squared_error(beta, sag(x, y,proximal_op=1, lam=lam, gamma=gamma)))
-# print("SVRG:", metrics.mean_squared_error(beta, svrg(x, y,proximal_op=1, lam=lam, gamma=gamma)))
-# print("SGD:", metrics.mean_squared_error(beta, stochastic_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)))
-# #print("BGD:", metrics.mean_squared_error(beta, batch_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)))
-# print("--------------------------------------------------------")
 
 
+print("--------------------------------------------------------")
+print("PROJECT RESULTS - TIME")
+print("--------------------------------------------------------")
+print("SAGA:", timer("saga(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
+                                          "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
+                                          "stochastic_gradient_descent, batch_gradient_descent;" +
+                                          "from basicCase.Utils import timer"), "sec.")
+print("SAG:", timer("sag(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
+                                          "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
+                                          "stochastic_gradient_descent, batch_gradient_descent;" +
+                                          "from basicCase.Utils import timer"), "sec.")
+print("SVRG:", timer("svrg(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
+                                          "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
+                                          "stochastic_gradient_descent, batch_gradient_descent;" +
+                                          "from basicCase.Utils import timer"), "sec.")
+print("SGD:", timer("stochastic_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
+                                          "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
+                                          "stochastic_gradient_descent, batch_gradient_descent;" +
+                                          "from basicCase.Utils import timer"), "sec.")
+# print("BGD:", timer("batch_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
+#                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
+#                                           "stochastic_gradient_descent, batch_gradient_descent;" +
+#                                           "from basicCase.Utils import timer"), "sec.")
+print("--------------------------------------------------------")
 
-    #
-# print("--------------------------------------------------------")
-# print("PROJECT RESULTS - TIME")
-# print("--------------------------------------------------------")
-# print("SAGA:", timer("saga(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
-#                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
-#                                           "stochastic_gradient_descent, batch_gradient_descent;" +
-#                                           "from basicCase.Utils import timer"), "sec.")
-# print("SAG:", timer("sag(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
-#                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
-#                                           "stochastic_gradient_descent, batch_gradient_descent;" +
-#                                           "from basicCase.Utils import timer"), "sec.")
-# print("SVRG:", timer("svrg(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
-#                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
-#                                           "stochastic_gradient_descent, batch_gradient_descent;" +
-#                                           "from basicCase.Utils import timer"), "sec.")
-# print("SGD:", timer("stochastic_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
-#                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
-#                                           "stochastic_gradient_descent, batch_gradient_descent;" +
-#                                           "from basicCase.Utils import timer"), "sec.")
-# # print("BGD:", timer("batch_gradient_descent(x, y,proximal_op=1, lam=lam, gamma=gamma)", "from __main__ import x, y, lam, gamma;" +
-# #                                           "from basicCase.Methods import compute_p_i, saga, sag, svrg," +
-# #                                           "stochastic_gradient_descent, batch_gradient_descent;" +
-# #                                           "from basicCase.Utils import timer"), "sec.")
-# print("--------------------------------------------------------")
-# print("IMPLEMENTED RESULTS - TIME")
-# print("--------------------------------------------------------")
-# print("SAGA:", timer("lr_saga = linear_model.LogisticRegression(solver='saga'); fit_saga = lr_saga.fit(x,y);" +
-#                      "lr_saga.coef_", "from __main__ import x, y;" +
-#                      "from sklearn import linear_model"), "sec.")
-# print("SAG:", timer("lr_sag = linear_model.LogisticRegression(solver='sag'); fit_sag = lr_sag.fit(x,y);" +
-#                      "lr_sag.coef_", "from __main__ import x, y;" +
-#                      "from sklearn import linear_model"), "sec.")
+
