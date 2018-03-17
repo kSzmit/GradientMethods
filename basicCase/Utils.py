@@ -17,7 +17,7 @@ class AveragableTable:
             self.average = self.average/len(matrix)
 
 
-    # replace item in storage table, adjust average and return previous value
+    # Replace item in storage table, adjust average and return previous value ###
     def replace_item(self, index, item):
         if index > len(self.__storage_table) - 1:
             raise IndexError("Error! Storage table size is " + str(len(self.__storage_table)) + ". Can't replace item on index " + str(index))
@@ -32,7 +32,7 @@ class AveragableTable:
         return self.__storage_table[index]
 
 
-    # add new element and modify average
+    # Add new element and modify average ###
     def append(self, item):
         self.average = self.average*self.size()/(self.size() + 1) + item/(self.size() + 1)
         self.__storage_table.append(item)
@@ -61,13 +61,15 @@ def generate_cov_matrix(dim, rho = 0, correlation_type = "constant"):
         return np.full((dim,dim),rho) + (1-rho)*np.eye(dim)
     elif correlation_type == "autocorrelation":
         return np.array( [ [ rho**abs(i-j) for j in range(dim)] for i in range(dim)] )
+    elif correlation_type == "id":
+        return np.eye(dim)
     else:
         raise ValueError("Error! Unknown correaltion type: " + correlation_type)
 
 
-def timer(s1, s2):
+def timer(s1, s2, repeat):
     t = timeit.Timer(s1, s2)
-    return round(t.timeit(10), 2)
+    return round(t.timeit(repeat), 2)
 
 
 def row_norms(X, squared=False):
@@ -75,5 +77,3 @@ def row_norms(X, squared=False):
     if not squared:
         np.sqrt(norms, norms)
     return norms
-
-
