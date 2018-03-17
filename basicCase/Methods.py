@@ -5,6 +5,8 @@ import random
 from sklearn import metrics
 from basicCase.Utils import AveragableTable, SnapshotListHolder
 from basicCase.Utils import row_norms
+from joblib import Parallel, delayed
+import multiprocessing
 
 
 def compute_p_i(x_i, beta):
@@ -94,8 +96,8 @@ def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_para
     return estimated_beta
 
 
-def saga(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None):
-    return sag(matrix_x, vector_y, gamma, proximal_op, lam, 1)
+def saga(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercept=1):
+    return sag(matrix_x, vector_y, gamma, proximal_op, lam, 1, fit_intercept)
 
 
 # internal loop length should be O(n) usually few times bigger, m will be used to determine loop length
@@ -181,3 +183,26 @@ def stochastic_gradient_descent(matrix_x, vector_y, gamma=None, proximal_op=None
         current_iter += 1
     return estimated_beta
 
+
+def MSE(method, beta, matrix_x, vector_y, gamma=None, proximal_op=None, lam=None,  fit_intercept=False):
+    if method=="saga":
+        mse= metrics.mean_squared_error(beta, saga(matrix_x, vector_y, gamma, proximal_op, lam,  fit_intercept))
+    elif method=="sag":
+        mse = metrics.mean_squared_error(beta, sag(matrix_x, vector_y,gamma,  proximal_op, lam, None, fit_intercept))
+    elif method=="svrg":
+        mse = metrics.mean_squared_error(beta, svrg(matrix_x, vector_y,gamma,  proximal_op, lam, fit_intercept))
+    elif method=="sgd":
+        mse = metrics.mean_squared_error(beta, stochastic_gradient_descent(matrix_x, vector_y, gamma, proximal_op, lam,  fit_intercept))
+    elif method=="bgd":
+        mse = metrics.mean_squared_error(beta, batch_gradient_descent(matrix_x, vector_y, gamma, proximal_op, lam,  fit_intercept))
+    else:
+        mse=0
+    return mse
+
+
+def sym(method, beta, x, y, gamma, proximal_op, lam, fit_intercept, iter):
+    num_cores = multiprocessing.cpu_count()
+    results = Parallel(n_jobs=num_cores - 1)(delayed(MSE)(method=method, beta=beta, matrix_x=x, vector_y=y, gamma=gamma,
+                                                          proximal_op=proximal_op, lam=lam, fit_intercept=fit_intercept)
+                                                 for i in range(iter))
+    return np.mean(results)

@@ -1,6 +1,7 @@
 import numpy as np
 import timeit
 
+
 class AveragableTable:
     def __init__(self, matrix=None):
         self.__storage_table = []
@@ -74,4 +75,5 @@ def row_norms(X, squared=False):
     if not squared:
         np.sqrt(norms, norms)
     return norms
+
 
