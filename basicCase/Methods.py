@@ -1,10 +1,9 @@
 import numpy as np
 import math
 import random
-
-from sklearn import metrics
-from basicCase.Utils import AveragableTable, SnapshotListHolder
-from basicCase.Utils import row_norms
+import matplotlib.pyplot as plt
+from sklearn import metrics, linear_model
+from basicCase.Utils import AveragableTable, SnapshotListHolder, row_norms, generate_cov_matrix, timer
 from joblib import Parallel, delayed
 import multiprocessing
 
@@ -138,7 +137,7 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
 
 
 # very slow
-def batch_gradient_descent(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercept=False, max_iter=100):
+def bgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercept=False, max_iter=100):
     n = len(matrix_x)
 
     if gamma is None:
@@ -161,7 +160,7 @@ def batch_gradient_descent(matrix_x, vector_y, gamma=None, proximal_op=None, lam
     return estimated_beta
 
 
-def stochastic_gradient_descent(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercept=False, max_iter=100):
+def sgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercept=False, max_iter=100):
     n = len(matrix_x)
 
     if gamma is None:
@@ -204,5 +203,44 @@ def sym(method, beta, x, y, gamma, proximal_op, lam, fit_intercept, iter):
     num_cores = multiprocessing.cpu_count()
     results = Parallel(n_jobs=num_cores - 1)(delayed(MSE)(method=method, beta=beta, matrix_x=x, vector_y=y, gamma=gamma,
                                                           proximal_op=proximal_op, lam=lam, fit_intercept=fit_intercept)
-                                                 for i in range(iter))
+                                                          for i in range(iter))
     return np.mean(results)
+
+
+def plot_mse(methods, d, n_vec, rho, cov_type, repeat, lasso=0, fit_intercept=0):
+    results = np.zeros((len(n_vec), len(methods)))
+    k = 0
+    for n in n_vec:
+        mean_vec = np.repeat(0, d)
+        cov_matrix = generate_cov_matrix(d, rho, cov_type)
+        x = np.random.multivariate_normal(mean_vec, cov_matrix, n)
+        if lasso == 1:
+            beta = np.random.binomial(np.ones((d,), dtype=int), 0.25)
+            beta_vals = np.concatenate([np.array(np.random.uniform(-2, -1, math.floor(d/2))),np.array(np.random.uniform(1, 2, math.ceil(d/2)))])
+            beta = np.multiply(beta_vals, beta)
+        else:
+            beta = np.random.uniform(-2, 2, d)
+        p = [compute_p_i(x[i], beta) for i in range(len(x))]
+        y = np.random.binomial(np.ones((len(x),), dtype=int), p)
+        if lasso == 1:
+            lassocv = linear_model.LassoCV(fit_intercept=fit_intercept, alphas=np.arange(0.001, 0.05, 0.001))
+            lassocv.fit(x, y)
+            lam = lassocv.alpha_/10
+            prox = 1
+        else:
+            lam = None
+            prox = None
+        j = 0
+        for m in methods:
+            results[k, j] = sym(method=m, beta=beta, x=x, y=y, gamma=None, proximal_op=prox, lam=lam, fit_intercept=fit_intercept, iter=repeat)
+            j = j+1
+        k = k+1
+    plt.xlabel('N')
+    plt.ylabel('MSE')
+    plt.title('RHO = ' + str(rho))
+    for i in range(len(methods)):
+        plt.plot(n_vec, results[:,i], '.-', label=methods[i])
+    leg = plt.legend(loc='best', ncol=2)
+    leg.get_frame().set_alpha(0.5)
+    plt.show()
+    return results
