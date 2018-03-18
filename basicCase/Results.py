@@ -32,10 +32,10 @@ if __name__ == "__main__":
 # results = np.zeros((len(n_vec), len(methods)))
 # k = 0
 # for n in n_vec:
-#     mean_vec = np.repeat(0, d)
-#     cov_matrix = generate_cov_matrix(d, rho, cov_type)
-#     x = np.random.multivariate_normal(mean_vec, cov_matrix, n)
-#     beta = np.random.uniform(-2, 2, d)
+#     mean_vec = np.repeat(0, d - 1)
+#     cov_matrix = generate_cov_matrix(d - 1, rho, cov_type)
+#     x = np.concatenate((np.ones((n, 1)), np.random.multivariate_normal(mean_vec, cov_matrix, n)), axis=1)
+#     beta = np.concatenate(([1], np.random.uniform(-2, 2, d-1)), axis=0)
 #     p = [compute_p_i(x[i], beta) for i in range(len(x))]
 #     y = np.random.binomial(np.ones((len(x),), dtype=int), p)
 #     j = 0
@@ -67,15 +67,15 @@ if __name__ == "__main__":
 # results = np.zeros((len(n_vec), len(methods)))
 # k = 0
 # for n in n_vec:
-#     mean_vec = np.repeat(0, d)
-#     cov_matrix = generate_cov_matrix(d, rho, cov_type)
-#     x = np.random.multivariate_normal(mean_vec, cov_matrix, n)
-#     beta = np.random.binomial(np.ones((d,), dtype=int), 0.25)
-#     beta_vals = np.concatenate([np.array(np.random.uniform(-2, -1, math.floor(d / 2))), np.array(np.random.uniform(1, 2, math.ceil(d / 2)))])
+#     mean_vec = np.repeat(0, d-1)
+#     cov_matrix = generate_cov_matrix(d-1, rho, cov_type)
+#     x = np.concatenate((np.ones((n, 1)), np.random.multivariate_normal(mean_vec, cov_matrix, n)), axis=1)
+#     beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
+#     beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
 #     beta = np.multiply(beta_vals, beta)
 #     p = [compute_p_i(x[i], beta) for i in range(len(x))]
 #     y = np.random.binomial(np.ones((len(x),), dtype=int), p)
-#     lassocv = linear_model.LassoCV(fit_intercept=fit_intercept, alphas=np.arange(0.001, 0.05, 0.001))
+#     lassocv = linear_model.LassoCV(fit_intercept=1, alphas=np.arange(0.001, 0.05, 0.001))
 #     lassocv.fit(x, y)
 #     lam = lassocv.alpha_ / 10
 #     j = 0
