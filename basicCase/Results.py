@@ -13,19 +13,22 @@ import matplotlib.pyplot as plt
 
 methods = np.array(["saga", "sag", "svrg", "sgd"])
 d = 20
+np.random.seed(200)
+beta = np.concatenate(([1], np.random.uniform(-2, 2, d-1)), axis=0)
+np.random.seed(None)
 gamma = None
 n_vec = np.array([200, 400, 600, 800, 1000])
 iter = 100
 
 rho = 0.3
-cov_type = "constant"
+cov_type = "id"
 
 ### Each plot must be executed independently (you have to comment another plots code)
 
 ### MSE plot ###
 
 if __name__ == "__main__":
-    print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, cov_type=cov_type, repeat=iter))
+    print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, repeat=iter))
 
 ### Execution time plot ###
 
@@ -58,10 +61,16 @@ if __name__ == "__main__":
 
 ### Exercise 2 ###
 
+# np.random.seed(100)
+# beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
+# beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
+# beta = np.multiply(beta_vals, beta)
+# np.random.seed(None)
+
 ### MSE plot ###
 
 # if __name__ == "__main__":
-#      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, cov_type=cov_type, lasso=1, repeat=iter))
+#      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, lasso=1, repeat=iter))
 
 ### Execution time plot ###
 
@@ -71,7 +80,6 @@ if __name__ == "__main__":
 #     mean_vec = np.repeat(0, d-1)
 #     cov_matrix = generate_cov_matrix(d-1, rho, cov_type)
 #     x = np.concatenate((np.ones((n, 1)), np.random.multivariate_normal(mean_vec, cov_matrix, n)), axis=1)
-#     np.random.seed(25)
 #     beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
 #     beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
 #     beta = np.multiply(beta_vals, beta)

@@ -206,14 +206,14 @@ def sym(method, beta, x, y, gamma, proximal_op, lam, fit_intercept, iter):
     return np.mean(results)
 
 
-def plot_mse(methods, d, n_vec, rho, cov_type, repeat, lasso=0, fit_intercept=1):
+def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_intercept=1):
     results = np.zeros((len(n_vec), len(methods)))
     k = 0
     for n in n_vec:
         mean_vec = np.repeat(0, d-1)
         cov_matrix = generate_cov_matrix(d-1, rho, cov_type)
         x = np.concatenate((np.ones((n, 1)), np.random.multivariate_normal(mean_vec, cov_matrix, n)), axis=1)
-        np.random.seed(25)
+        np.random.seed(100)
         if lasso == 1:
             beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
             beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
