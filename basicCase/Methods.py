@@ -213,6 +213,7 @@ def plot_mse(methods, d, n_vec, rho, cov_type, repeat, lasso=0, fit_intercept=1)
         mean_vec = np.repeat(0, d-1)
         cov_matrix = generate_cov_matrix(d-1, rho, cov_type)
         x = np.concatenate((np.ones((n, 1)), np.random.multivariate_normal(mean_vec, cov_matrix, n)), axis=1)
+        np.random.seed(25)
         if lasso == 1:
             beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
             beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
@@ -236,7 +237,7 @@ def plot_mse(methods, d, n_vec, rho, cov_type, repeat, lasso=0, fit_intercept=1)
         k = k+1
     plt.xlabel('N')
     plt.ylabel('MSE')
-    plt.title('RHO = ' + str(rho))
+    plt.title('RHO = ' + str(rho) + ', ' + cov_type)
     for i in range(len(methods)):
         plt.plot(n_vec, results[:,i], '.-', label=methods[i])
     leg = plt.legend(loc='best', ncol=2)
