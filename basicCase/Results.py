@@ -3,7 +3,7 @@ import math
 import random
 from sklearn import linear_model, metrics
 from basicCase.Methods import compute_p_i, saga, sag, svrg, sgd, bgd, MSE, sym, plot_mse
-from basicCase.Utils import generate_cov_matrix, timer
+from basicCase.Utils import generate_cov_matrix, timer, create_beta, seed_wrap_function
 import matplotlib.pyplot as plt
 
 
@@ -13,9 +13,7 @@ import matplotlib.pyplot as plt
 
 methods = np.array(["saga", "sag", "svrg", "sgd"]) #,"bgd"])
 d = 20
-np.random.seed(200)
-beta = np.concatenate(([1], np.random.uniform(-2, 2, d-1)), axis=0)
-np.random.seed(None)
+beta=seed_wrap_function(create_beta, [1, d])
 gamma = None
 n_vec = np.array([200, 400, 600, 800, 1000])
 iter = 100
@@ -31,7 +29,7 @@ cov_type = "id"
 ### MSE plot ###
 
 if __name__ == "__main__":
-    print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, repeat=iter))
+     print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, repeat=iter))
 
 ### Execution time plot ###
 
@@ -68,17 +66,19 @@ if __name__ == "__main__":
 
 ### Initial parameters ###
 
-np.random.seed(100)
-beta = np.concatenate(([1], np.random.binomial(np.ones((d-1,), dtype=int), 0.25)), axis=0)
-beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d-1)/2))),np.array(np.random.uniform(1, 2, math.ceil((d-1)/2)))])), axis=0)
-beta = np.multiply(beta_vals, beta)
-np.random.seed(None)
+beta=seed_wrap_function(create_beta, [2, d])
 
 
-
-## rho and cov parameters to test
+# ## rho and cov parameters to test
 rho = 0.3
 cov_type = "id"
+
+### MSE plot ###
+
+# if __name__ == "__main__":
+#      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, lasso=1, repeat=iter))
+
+
 
 ### MSE plot ###
 
