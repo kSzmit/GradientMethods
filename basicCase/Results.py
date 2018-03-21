@@ -16,20 +16,20 @@ d = 20
 beta=seed_wrap_function(create_beta, [1, d])
 gamma = None
 n_vec = np.array([200, 400, 600, 800, 1000])
-iter = 100
+iter = 1
 
 
 
 ## rho and cov parameters to test
-rho = 0.3
-cov_type = "id"
+# rho = 0.3
+# cov_type = "id"
 
 ### Each plot must be executed independently (you have to comment another plots code)
 
 ### MSE plot ###
 
-if __name__ == "__main__":
-     print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, repeat=iter))
+# if __name__ == "__main__":
+#      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, repeat=iter))
 
 ### Execution time plot ###
 
@@ -75,9 +75,8 @@ cov_type = "id"
 
 ### MSE plot ###
 
-# if __name__ == "__main__":
-#      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, lasso=1, repeat=iter))
-
+if __name__ == "__main__":
+      print(plot_mse(methods=methods, d=d, n_vec=n_vec, rho=rho, beta=beta, cov_type=cov_type, lasso=1, repeat=iter))
 
 
 ### MSE plot ###
