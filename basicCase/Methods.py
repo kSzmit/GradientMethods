@@ -127,7 +127,7 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
             tmp_beta = tmp_beta - gamma*(tmp_beta_derivative - estimated_beta_derivative + gradient_avg)
 
             if proximal_op is not None:
-                tmp_beta = lasso_proxy_operator(beta, gamma, lam)
+                tmp_beta = lasso_proxy_operator(tmp_beta, gamma, lam)
 
         estimated_beta = tmp_beta
         current_iter += 1
