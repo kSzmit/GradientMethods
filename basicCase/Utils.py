@@ -90,7 +90,7 @@ def create_beta(zad, d):
     return beta
 
 def seed_wrap_function(func, args):
-    np.random.seed(69)
+    np.random.seed(150)
     x=func(*args)
     np.random.seed(None)
     return x
