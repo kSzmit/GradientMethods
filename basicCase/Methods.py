@@ -70,7 +70,6 @@ def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_para
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = sag_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                               is_saga=(divisor_param == 1), samples_num=len(matrix_x))
-
     n = len(matrix_x)
     beta = np.repeat(0, matrix_x.shape[1])
     average_table = AveragableTable([compute_derivative_f_i(matrix_x[i], vector_y[i], beta) for i in range(n)])
@@ -108,7 +107,6 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = svrg_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                                samples_num=len(matrix_x), m=m)
-
     beta = np.repeat(0, matrix_x.shape[1])
     estimated_beta, tmp_beta = beta, beta
 
@@ -127,11 +125,9 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
             tmp_beta = tmp_beta - gamma*(tmp_beta_derivative - estimated_beta_derivative + gradient_avg)
 
             if proximal_op is not None:
-                tmp_beta = lasso_proxy_operator(beta, gamma, lam)
-
+                tmp_beta = lasso_proxy_operator(tmp_beta, gamma, lam)
         estimated_beta = tmp_beta
         current_iter += 1
-
     return estimated_beta
 
 
@@ -153,6 +149,8 @@ def bgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercep
         for i in range(n):
             gradient_avg = average_of_derivatives(matrix_x, vector_y, estimated_beta)
             estimated_beta = estimated_beta - gamma*gradient_avg
+            if proximal_op is not None:
+                estimated_beta = lasso_proxy_operator(estimated_beta, gamma, lam)
 
         current_iter += 1
 
@@ -166,7 +164,6 @@ def sgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercep
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = svrg_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                                samples_num=len(matrix_x), m=1)
-
     estimated_beta = np.repeat(0, matrix_x.shape[1])
     index_list = list(range(len(matrix_x)))
 
@@ -178,6 +175,8 @@ def sgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercep
         for index in index_list:
             single_gradient = compute_derivative_f_i(matrix_x[index], vector_y[index], estimated_beta)
             estimated_beta = estimated_beta - gamma*single_gradient
+            if proximal_op is not None:
+                estimated_beta = lasso_proxy_operator(estimated_beta, gamma, lam)
         current_iter += 1
     return estimated_beta
 
@@ -206,7 +205,7 @@ def sym(method, beta, x, y, gamma, proximal_op, lam, fit_intercept, iter):
     return np.mean(results)
 
 
-def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_intercept=1):
+def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_intercept=1, lam=0.0015):
     results = np.zeros((len(n_vec), len(methods)))
     k = 0
     for n in n_vec:
@@ -217,9 +216,6 @@ def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_interc
         p = [compute_p_i(x[i], beta) for i in range(len(x))]
         y = np.random.binomial(np.ones((len(x),), dtype=int), p)
         if lasso == 1:
-            lassocv = linear_model.LassoCV(fit_intercept=fit_intercept, alphas=np.arange(0.001, 0.05, 0.001))
-            lassocv.fit(x, y)
-            lam = lassocv.alpha_/10
             prox = 1
         else:
             lam = None
@@ -231,11 +227,14 @@ def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_interc
         k = k+1
     plt.xlabel('N')
     plt.ylabel('MSE')
-    plt.title('RHO = ' + str(rho) + ', ' + cov_type)
+    plt.title('RHO = ' + str(rho) + ', ' + cov_type+ ", proxy=" + str(prox) + ", lam = " + str(lam))
     for i in range(len(methods)):
         plt.plot(n_vec, results[:,i], '.-', label=methods[i])
     leg = plt.legend(loc='best', ncol=2)
     leg.get_frame().set_alpha(0.5)
-    plt.show(block=False)
+    plt.savefig(fname=str(cov_type) + str(rho) + "_proxy_" + str(prox) +".png")
+    plt.close()
     return 0
+
+
 
