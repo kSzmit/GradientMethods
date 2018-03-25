@@ -82,7 +82,7 @@ def create_beta(zad, d):
     if zad==1:
         beta = np.concatenate(([1], np.random.uniform(-2, 2, d - 1)), axis=0)
     elif zad==2:
-        beta = np.concatenate(([1], np.random.binomial(np.ones((d - 1,), dtype=int), 0.25)), axis=0)
+        beta = np.concatenate(([1], np.random.binomial(np.ones((d - 1,), dtype=int), 0.2)), axis=0)
         beta_vals = np.concatenate(([1], np.concatenate([np.array(np.random.uniform(-2, -1, math.floor((d - 1) / 2))),
                                                          np.array(np.random.uniform(1, 2, math.ceil((d - 1) / 2)))])),
                                    axis=0)
