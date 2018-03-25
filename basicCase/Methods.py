@@ -237,7 +237,6 @@ def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_interc
         plt.plot(n_vec, results[:,i], '.-', label=methods[i])
     leg = plt.legend(loc='best', ncol=2)
     leg.get_frame().set_alpha(0.5)
-    plt.savefig(fname=str(cov_type) + str(rho) + "_proxy_" + str(prox) +".png")
-    plt.close()
+    plt.show()
     return 0
 
