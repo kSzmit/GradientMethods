@@ -70,6 +70,7 @@ def sag(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, divisor_para
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = sag_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                               is_saga=(divisor_param == 1), samples_num=len(matrix_x))
+
     n = len(matrix_x)
     beta = np.repeat(0, matrix_x.shape[1])
     average_table = AveragableTable([compute_derivative_f_i(matrix_x[i], vector_y[i], beta) for i in range(n)])
@@ -107,6 +108,7 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = svrg_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                                samples_num=len(matrix_x), m=m)
+
     beta = np.repeat(0, matrix_x.shape[1])
     estimated_beta, tmp_beta = beta, beta
 
@@ -125,9 +127,11 @@ def svrg(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_interce
             tmp_beta = tmp_beta - gamma*(tmp_beta_derivative - estimated_beta_derivative + gradient_avg)
 
             if proximal_op is not None:
-                tmp_beta = lasso_proxy_operator(tmp_beta, gamma, lam)
+                tmp_beta = lasso_proxy_operator(beta, gamma, lam)
+
         estimated_beta = tmp_beta
         current_iter += 1
+
     return estimated_beta
 
 
@@ -164,6 +168,7 @@ def sgd(matrix_x, vector_y, gamma=None, proximal_op=None, lam=None, fit_intercep
         max_sq_sum = row_norms(matrix_x, True).max()
         gamma = svrg_step_size(max_sq_sum, is_lasso=(proximal_op is not None), fit_intercept=fit_intercept,
                                samples_num=len(matrix_x), m=1)
+
     estimated_beta = np.repeat(0, matrix_x.shape[1])
     index_list = list(range(len(matrix_x)))
 
@@ -235,6 +240,4 @@ def plot_mse(methods, d, n_vec, rho, beta, cov_type, repeat, lasso=0, fit_interc
     plt.savefig(fname=str(cov_type) + str(rho) + "_proxy_" + str(prox) +".png")
     plt.close()
     return 0
-
-
 
